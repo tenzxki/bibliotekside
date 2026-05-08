@@ -19,7 +19,7 @@ På eksamensdagen skal jeg
 - Opprette tabeller, koble til databasen og legge til alle ruter
 - Login som redirecter bruker til riktig side basert på rolle.
 
-- Lag et godt og detaljert Kanban-board (github-projects) som du viser for sensor. Legg inn link her
+- https://github.com/users/tenzxki/projects/2
 
 ---
 ## 2. Systembeskrivelse
@@ -88,7 +88,6 @@ På eksamensdagen skal jeg
 - run.py og Waitress
 
 
-Refleksjon: Hvordan hjalp Kanban arbeidet?
 Kanban-boardet ga god oversikt over hva som var gjort og hva som gjenstod.
 
 ------------------------------------------------------------------------
