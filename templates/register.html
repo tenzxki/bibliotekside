@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrering</title>
+</head>
+<body>
+    <h2>Bibliotek Utlån</h2>
+    <p>Opprett en konto</p>
+
+    <form method="POST">
+        <label>Navn</label>
+        <input type="text" name="name" required>
+
+        <label>Email</label>
+        <input type="email" name="email" required>
+
+        <label>Passord</label>
+        <input type="password" name="password" required>
+
+        <button type="submit">Registrer</button>
+    </form>
+
+  <p>Har du allerede en konto? <a href="{{ url_for('login') }}">Logg inn</a></p>
+
+</body>
+</html>

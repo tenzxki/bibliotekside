@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <title>Logg inn</title>
+</head>
+<body>
+    <h2>Bibliotek</h2>
+    <p>Logg inn på kontoen din</p>
+
+    <form method="POST">
+        <label>Email</label>
+        <input type="email" name="email" required>
+
+        <label>Passord</label>
+        <input type="password" name="password" required>
+
+        <button type="submit">Logg inn</button>
+    </form>
+
+    <p>Har du ikke en konto? <a href="{{ url_for('register') }}">Registrer deg</a></p>
+
+</body>
+</html>

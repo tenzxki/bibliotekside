@@ -7,7 +7,7 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv('supersecretkey')
+app.secret_key = "supersecretkey"
 bcrypt = Bcrypt(app)
 
 @app.route('/')
@@ -19,8 +19,75 @@ def index():
     else:
         return redirect(url_for('browse'))
 
+@app.route('/register', methods = ['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        navn = request.form['name']
+        email = request.form['email']
+        passord = bcrypt.generate_password_hash(request.form['password']).decode('utf-8')
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        try:
+            cursor.execute("INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, 'user')",
+                        (navn, email, passord))
+            conn.commit()
+            flash("Bruker registrert!", "success")
+            cursor.close()
+            conn.close()
+            return redirect(url_for("login"))
+        except Exception as e:
+            conn.rollback()
+            flash("Email er allerede i bruk!", "error")
+            print(f"Error: {e}")
+            cursor.close()
+            conn.close()
+
+    return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form['email']
+        passord = request.form['password']
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
+        bruker = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if bruker and bcrypt.check_password_hash(bruker['password'], passord):
+            session['user_id'] = bruker['id']
+            session['name'] = bruker['name'] 
+            session['role'] = bruker['role']
+
+            if bruker['role'] == 'admin':
+                return redirect(url_for("borrowings"))
+            else:
+                return redirect(url_for("browse"))
+        else:
+            flash("Feil email eller passord", "error")
+            return render_template("login.html")
+
+    return render_template("login.html")
 
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash("Du er nå logget ut", "info")
+    return redirect(url_for('login'))
+
+
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+    
 
 
 
