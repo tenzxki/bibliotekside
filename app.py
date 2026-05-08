@@ -15,7 +15,7 @@ def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     if session.get('role') == 'admin':
-        return redirect(url_for('borrowings'))
+        return redirect(url_for('admin_borrowings'))
     else:
         return redirect(url_for('browse'))
 
@@ -65,7 +65,7 @@ def login():
             session['role'] = bruker['role']
 
             if bruker['role'] == 'admin':
-                return redirect(url_for("borrowings"))
+                return redirect(url_for("admin_borrowings"))
             else:
                 return redirect(url_for("browse"))
         else:
@@ -81,8 +81,146 @@ def logout():
     flash("Du er nå logget ut", "info")
     return redirect(url_for('login'))
 
+@app.route('/admin/borrowings') 
+def admin_borrowings():
+    if session.get('role') != 'admin':
+        return redirect(url_for('login'))
+    
+    status_filter = request.args.get('status', 'all') # Fra Claude
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if status_filter == 'all': #Fra Claude
+        cursor.execute("""
+            SELECT br.*, b.title, u.name
+            FROM borrowings br
+            JOIN books b ON br.book_id = b.id
+            JOIN users u ON br.user_id = u.id
+            ORDER BY br.created_at DESC
+        """)
+    else:
+        cursor.execute("""
+            SELECT br.*, b.title, u.name
+            FROM borrowings br
+            JOIN books b ON br.book_id = b.id
+            JOIN users u ON br.user_id = u.id
+            WHERE br.status = %s
+            ORDER BY br.created_at DESC
+        """, (status_filter,))
+
+    borrowings = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template('admin/borrowings.html', borrowings=borrowings, status_filter=status_filter)
+
+@app.route('/browse')
+def browse():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT* FROM books ORDER BY title")
+    bøker = cursor.fetchall()
+
+    cursor.execute("""
+    SELECT book_id FROM borrowings
+    WHERE status IN ('pending', 'active')
+    """)
+    opptatte = [row['book_id'] for row in cursor.fetchall()] #Hjelp av Claude
+
+    cursor.close()
+    conn.close()
+
+    return render_template('user/browse.html', bøker=bøker, opptatte=opptatte)
+
+@app.route('/my-loans')
+def my_loans():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+#Litt hjelp av claude
+    cursor.execute("""
+        SELECT br.*, b.title
+        FROM borrowings br
+        JOIN books b ON br.book_id = b.id
+        WHERE br.user_id = %s AND br.status IN ('pending', 'active') 
+        ORDER BY br.created_at DESC
+    """, (session['user_id'],))
+    aktive = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('user/my_loans.html', aktive=aktive)
 
 
+
+@app.route('/browse/request/<int:book_id>', methods=['POST'])
+def request_loan(book_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT id FROM borrowings
+            WHERE book_id = %s AND status IN ('pending', 'active')
+        """, (book_id,))
+
+        if cursor.fetchone():
+            flash("Denne boken er ikke tilgjengelig")
+        else:
+            cursor.execute("""
+                INSERT INTO borrowings (book_id, user_id)
+                VALUES (%s, %s)
+            """, (book_id, session['user_id']))
+            conn.commit()
+            flash("Låneforespørsel sendt!")
+    except Exception as e:
+        conn.rollback()
+        flash("Noe gikk galt")
+        print(f"Feil: {e}")
+
+    cursor.close()
+    conn.close()
+    return redirect(url_for('browse'))
+
+
+@app.route('/admin/borrowings/approve/<int:id>', methods=['POST'])
+def approve_borrowing(id):
+    if session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    due_date = request.form['due_date']
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            UPDATE borrowings
+            SET status = 'active', borrowed_at = CURDATE(), due_date = %s
+            WHERE id = %s
+        """, (due_date, id))
+        conn.commit()
+        flash("Forespørsel godkjent!")
+    except Exception as e:
+        conn.rollback()
+        flash("Noe gikk galt")
+        print(f"Feil: {e}")
+
+    cursor.close()
+    conn.close()
+    return redirect(url_for('admin_borrowings'))
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <title>Katalog</title>
+</head>
+<body>
+
+<nav>
+    <a href="{{ url_for('browse') }}">Katalog</a>
+    <a href="{{ url_for('my_loans') }}">Mine lån</a>
+    <div>Hei, {{ session['name'] }}</div>
+    <a href="{{ url_for('logout') }}">Logg ut</a>
+</nav>
+
+{% with messages = get_flashed_messages() %}
+    {% for message in messages %}
+        <div>{{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+<h1>Bokkatalog</h1>
+
+{% for bok in bøker %}
+<div>
+    <h3>{{ bok['title'] }}</h3>
+    <p>{{ bok['author'] }}</p>
+    <p>{{ bok['genre'] if bok['genre'] else 'Ingen sjanger' }}</p>
+
+    {% if bok['id'] in opptatte %}
+        <p>Utilgjengelig</p>
+    {% else %}
+        <p>Tilgjengelig</p>
+        <form method="POST" action="{{ url_for('request_loan', book_id=bok['id']) }}">
+            <button type="submit">Send forespørsel</button>
+        </form>
+    {% endif %}
+</div>
+{% endfor %}
+
+</body>
+</html>

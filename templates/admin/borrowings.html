@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin — Låneforespørsler</title>
+</head>
+<body>
+
+<nav>
+    <div>Bibliotek</div>
+    <div>Hei, {{ session['name'] }}</div>
+    <a href="{{ url_for('logout') }}">Logg ut</a>
+</nav>
+
+{% with messages = get_flashed_messages() %}
+    {% for message in messages %}
+        <div>{{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+<h1>Låneforespørsler</h1>
+
+<a href="?status=all">Alle</a>
+<a href="?status=pending">Venter</a>
+<a href="?status=active">Aktive</a>
+<a href="?status=returned">Returnerte</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>Bok</th>
+            <th>Bruker</th>
+            <th>Status</th>
+            <th>Sendt inn</th>
+            <th>Forfallsdato</th>
+            <th>Handlinger</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for b in borrowings %}
+        <tr>
+            <td>{{ b['title'] }}</td>
+            <td>{{ b['name'] }}</td>
+            <td>{{ b['status'] }}</td>
+            <td>{{ b['created_at'] }}</td>
+            <td>{{ b['due_date'] if b['due_date'] else '—' }}</td>
+            <td>
+                {% if b['status'] == 'pending' %}
+                    <form method="POST" action="{{ url_for('approve_borrowing', id=b['id']) }}" style="display:inline">
+                        <input type="date" name="due_date" required>
+                        <button type="submit">Godkjenn</button>
+                    </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>
