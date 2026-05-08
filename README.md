@@ -174,6 +174,7 @@ En bruker kan ha mange borrowings. En bok kan ha mange borrowings over tid, men 
     │   │   ├── browse.html
     │   │   └── my_loans.html
     │   └── login.html
+    ├── venv/
     ├── .env
     ├── .gitignore
     ├── app.py
