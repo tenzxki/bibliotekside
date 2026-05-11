@@ -173,6 +173,7 @@ En bruker kan ha mange borrowings. En bok kan ha mange borrowings over tid, men 
     │   ├── user/
     │   │   ├── browse.html
     │   │   └── my_loans.html
+    │   │── register.html
     │   └── login.html
     ├── venv/
     ├── .env
@@ -194,6 +195,8 @@ Databasestrøm:
 
 | Metode | Rute | Hva den gjør |
 |--------|-------|-------------|
+|--------| `/`| Sender deg til riktig side|
+| GET/POST | `/register` | Registrere bruker |
 | GET/POST | `/login` | Innlogging, redirect basert på rolle |
 | GET | `/logout` | Tøm session, redirect til login |
 | GET | `/admin/borrowings` | Se alle låneforespørsler |
@@ -242,10 +245,17 @@ AND status = 'active'" Sørger for at systemet ikke tillater at to personer har 
 
 ## 9. Feilsøking og testing
 
--   Typiske feil\
--   Hvordan du løste dem\
+ **Typiske feil**
+  - Blank side
+  - Os error (Adress already in use)
+  
+   **Hvordan du løste dem**
+   -Sjekke error koden (Fortalte meg at login ikke har en url endpoint)
+   - Os error løste jeg ved et kjapt google søk som fortalte meg at det er en annen prossess som brukte addressen. Denne måtte jeg finne og drepe med kommanoden sudo fuser -k 8080/tcp
+   
   **Testmetoder**
    - Manuell testing i nettleser ved å teste alle ruter med ulike brukerroller
+   - Google søk for errors
 
 ------------------------------------------------------------------------
 
@@ -260,5 +270,8 @@ AND status = 'active'" Sørger for at systemet ikke tillater at to personer har 
 
 ## 11. Kildeliste
 
--   w3schools\
+-   w3schools
 -   flask.palletsprojects.com
+-   Claude
+-   Geeksforgeeks
+-   
