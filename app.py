@@ -91,7 +91,7 @@ def admin_borrowings():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
-    if status_filter == 'all': #Fra Claude
+    if status_filter == 'all': 
         cursor.execute("""
             SELECT br.*, b.title, u.name
             FROM borrowings br
@@ -221,6 +221,51 @@ def approve_borrowing(id):
     cursor.close()
     conn.close()
     return redirect(url_for('admin_borrowings'))
+
+
+@app.route('/faq', methods=['GET', 'POST'])
+def faq():
+    LoggedIn = True
+    if 'user_id' not in session:
+        LoggedIn = False
+
+    if request.method == 'POST':
+        sporsmal = request.form['sporsmal']
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        try:
+            cursor.execute(
+                "INSERT INTO faq (sporsmal, user_id) VALUES (%s, %s)",
+                (sporsmal, session['user_id'])
+            )
+            conn.commit()
+            flash("Spørsmål sendt!")
+        except Exception as e:
+            conn.rollback()
+            flash("Noe gikk galt")
+            print(f"Feil: {e}")
+
+        cursor.close()
+        conn.close()
+        return redirect(url_for('faq'))
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT f.*, u.name, u.email
+        FROM faq f
+        JOIN users u ON f.user_id = u.id
+        ORDER BY f.opprettet DESC
+    """)
+    sporsmal = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('user/faq.html', sporsmal=sporsmal, LoggedIn=LoggedIn)
 
 if __name__ == '__main__':
     app.run(debug=True)

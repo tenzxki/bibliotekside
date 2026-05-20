@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="no">
+
+<head>
+    <meta charset="UTF-8">
+    <title>FAQ</title>
+</head>
+
+<body>
+
+    <nav>
+        <a href="{{ url_for('browse') }}">Katalog</a>
+        <a href="{{ url_for('my_loans') }}">Mine lån</a>
+        <a href="{{ url_for('faq') }}">FAQ</a>
+        <a href="{{ url_for('logout') }}">Logg ut</a>
+    </nav>
+
+    {% with messages = get_flashed_messages() %}
+    {% for message in messages %}
+    <div>{{ message }}</div>
+    {% endfor %}
+    {% endwith %}
+
+    <h1>Ofte stilte spørsmål</h1>
+
+    <h3>Hvordan logger jeg inn?</h3>
+    <p>Gå til innloggingssiden og skriv inn email og passord.</p>
+
+    <h3>Hvordan låner jeg en bok?</h3>
+    <p>Gå til katalogen, finn en ledig bok og trykk "Send forespørsel".</p>
+
+    <h3>Hvordan returnerer jeg en bok?</h3>
+    <p>Gå til "Mine lån" og trykk "Returner" på boken du vil levere tilbake.</p>
+
+    <h3>Hvordan endrer jeg passord?</h3>
+    <p>Kontakt biblioteket så hjelper vi deg med å endre passordet.</p>
+
+    <h3>Hvordan behandles persondata?</h3>
+    <p>Vi lagrer kun navn, email og lånehistorikk. Data deles ikke med tredjepart.</p>
+
+    <hr>
+
+    <h2>Send inn spørsmål</h2>
+
+    {% if LoggedIn %}
+        <p>Navn: {{ session['name'] }}</p>
+
+        <form method="POST">
+            <label>Spørsmål</label>
+            <textarea name="sporsmal" required></textarea>
+            <button type="submit">Send inn</button>
+        </form>
+    {% endif %}
+
+    <hr>
+
+    <h2>Innsendte spørsmål</h2>
+
+    {% if sporsmal %}
+        {% for s in sporsmal %}
+            <p><strong>{{ s['name'] }}</strong> — {{ s['sporsmal'] }} <em>({{ s['opprettet'] }})</em></p>
+        {% endfor %}
+    {% else %}
+        <p>Ingen spørsmål ennå.</p>
+    {% endif %}
+
+</body>
+
+</html>
