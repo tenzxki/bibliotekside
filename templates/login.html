@@ -7,6 +7,12 @@
 <body>
     <h2>Bibliotek</h2>
     <p>Logg inn på kontoen din</p>
+    
+    {% with messages = get_flashed_messages() %}
+    {% for message in messages %}
+        <div>{{ message }}</div>
+    {% endfor %}
+{% endwith %}
 
     <nav><a href="{{url_for('faq')}}">FAQ</a></nav>
 

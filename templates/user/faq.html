@@ -1,69 +1,84 @@
 <!DOCTYPE html>
 <html lang="no">
-
 <head>
     <meta charset="UTF-8">
     <title>FAQ</title>
 </head>
-
 <body>
 
-    <nav>
-        <a href="{{ url_for('browse') }}">Katalog</a>
-        <a href="{{ url_for('my_loans') }}">Mine lån</a>
-        <a href="{{ url_for('faq') }}">FAQ</a>
-        <a href="{{ url_for('logout') }}">Logg ut</a>
-    </nav>
+<nav>
+    <a href="{{ url_for('browse') }}">Katalog</a>
+    <a href="{{ url_for('my_loans') }}">Mine lån</a>
+    <a href="{{ url_for('faq') }}">FAQ</a>
+    <a href="{{ url_for('logout') }}">Logg ut</a>
+</nav>
 
-    {% with messages = get_flashed_messages() %}
+{% with messages = get_flashed_messages() %}
     {% for message in messages %}
-    <div>{{ message }}</div>
+        <div>{{ message }}</div>
     {% endfor %}
-    {% endwith %}
+{% endwith %}
 
-    <h1>Ofte stilte spørsmål</h1>
+<h1>Ofte stilte spørsmål</h1>
 
-    <h3>Hvordan logger jeg inn?</h3>
-    <p>Gå til innloggingssiden og skriv inn email og passord.</p>
+<h3>Hvordan logger jeg inn?</h3>
+<p>Gå til innloggingssiden og skriv inn email og passord.</p>
 
-    <h3>Hvordan låner jeg en bok?</h3>
-    <p>Gå til katalogen, finn en ledig bok og trykk "Send forespørsel".</p>
+<h3>Hvordan låner jeg en bok?</h3>
+<p>Gå til katalogen, finn en ledig bok og trykk "Send forespørsel".</p>
 
-    <h3>Hvordan returnerer jeg en bok?</h3>
-    <p>Gå til "Mine lån" og trykk "Returner" på boken du vil levere tilbake.</p>
+<h3>Hvordan returnerer jeg en bok?</h3>
+<p>Gå til "Mine lån" og trykk "Returner" på boken du vil levere tilbake.</p>
 
-    <h3>Hvordan endrer jeg passord?</h3>
-    <p>Kontakt biblioteket så hjelper vi deg med å endre passordet.</p>
+<h3>Hvordan endrer jeg passord?</h3>
+<p>Kontakt biblioteket så hjelper vi deg med å endre passordet.</p>
 
-    <h3>Hvordan behandles persondata?</h3>
-    <p>Vi lagrer kun navn, email og lånehistorikk. Data deles ikke med tredjepart.</p>
+<h3>Hvordan behandles persondata?</h3>
+<p>Vi lagrer kun navn, email og lånehistorikk. Data deles ikke med tredjepart.</p>
+
+<hr>
+
+<h2>Send inn spørsmål</h2>
+
+{% if LoggedIn %}
+    <p>Navn: {{ session['name'] }}</p>
+    <p>Email: {{ session['email'] }}</p>
+
+    <form method="POST">
+        <label>Spørsmål</label><br>
+        <textarea name="sporsmal" required></textarea><br>
+        <button type="submit">Send inn</button>
+    </form>
 
     <hr>
 
-    <h2>Send inn spørsmål</h2>
+    <h2>Slett bruker</h2>
+    <p>Dette vil erstatte navn og email med anonym informasjon og slette brukeren din.</p>
+    <form method="POST">
+        <label>Email</label><br>
+        <input type="email" name="email" required><br>
+        <button type="submit">Slett</button>
+    </form>
 
-    {% if LoggedIn %}
-        <p>Navn: {{ session['name'] }}</p>
+{% else %}
+    <p><a href="{{ url_for('login') }}">Logg inn</a> for å sende spørsmål.</p>
+{% endif %}
 
-        <form method="POST">
-            <label>Spørsmål</label>
-            <textarea name="sporsmal" required></textarea>
-            <button type="submit">Send inn</button>
-        </form>
-    {% endif %}
+<hr>
 
-    <hr>
+<h2>Innsendte spørsmål</h2>
 
-    <h2>Innsendte spørsmål</h2>
-
-    {% if sporsmal %}
-        {% for s in sporsmal %}
-            <p><strong>{{ s['name'] }}</strong> — {{ s['sporsmal'] }} <em>({{ s['opprettet'] }})</em></p>
-        {% endfor %}
-    {% else %}
-        <p>Ingen spørsmål ennå.</p>
-    {% endif %}
+{% if sporsmal %}
+    {% for s in sporsmal %}
+        <p>
+            <strong>{{ s['name'] }}</strong> ({{ s['email'] }}) —
+            {{ s['sporsmal'] }}
+            <em>({{ s['opprettet'] }})</em>
+        </p>
+    {% endfor %}
+{% else %}
+    <p>Ingen spørsmål ennå.</p>
+{% endif %}
 
 </body>
-
 </html>
