@@ -82,39 +82,12 @@ def logout():
     flash("Du er nå logget ut", "info")
     return redirect(url_for('login'))
 
-@app.route('/admin/borrowings') 
-def admin_borrowings():
-    if session.get('role') != 'admin':
-        return redirect(url_for('login'))
+#Lage admin borrowings route her
+#@app.route('/admin/borrowings')
+#def admin_borrowings():
     
-    status_filter = request.args.get('status', 'all') # Fra Claude
 
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
 
-    if status_filter == 'all': 
-        cursor.execute("""
-            SELECT br.*, b.title, u.name
-            FROM borrowings br
-            JOIN books b ON br.book_id = b.id
-            JOIN users u ON br.user_id = u.id
-            ORDER BY br.created_at DESC
-        """)
-    else:
-        cursor.execute("""
-            SELECT br.*, b.title, u.name
-            FROM borrowings br
-            JOIN books b ON br.book_id = b.id
-            JOIN users u ON br.user_id = u.id
-            WHERE br.status = %s
-            ORDER BY br.created_at DESC
-        """, (status_filter,))
-
-    borrowings = cursor.fetchall()
-    cursor.close()
-    conn.close()
-
-    return render_template('admin/borrowings.html', borrowings=borrowings, status_filter=status_filter)
 
 @app.route('/browse')
 def browse():
@@ -222,6 +195,11 @@ def approve_borrowing(id):
     cursor.close()
     conn.close()
     return redirect(url_for('admin_borrowings'))
+
+#Lage reject borrowing routen her
+#@app.route('/admin/borrowings/reject/<int:id>', methods=['POST'])
+#def reject_borrowing(id):
+    
 
 @app.route('/faq', methods=['GET', 'POST'])
 def faq():
