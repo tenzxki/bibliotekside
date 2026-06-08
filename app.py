@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_bcrypt import Bcrypt 
 from db_conn import get_connection
 from dotenv import load_dotenv
+from waitress import serve
 import os
 
 load_dotenv()
@@ -82,11 +83,40 @@ def logout():
     flash("Du er nå logget ut", "info")
     return redirect(url_for('login'))
 
-#Lage admin borrowings route her
-#@app.route('/admin/borrowings')
-#def admin_borrowings():
-    
 
+@app.route('/admin/borrowings')
+def admin_borrowings():
+    if session.get('role') != 'admin':
+        return redirect (url_for('login'))
+    
+    status_filter = request.args.get('status', 'all')
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if status_filter == 'all':
+        cursor.execute("""
+            SELECT borrowings.*, books.title, users.name
+            FROM borrowings
+            JOIN books ON borrowings.book_id = books.id
+            JOIN users ON borrowings.user_id = users.id
+            ORDER BY borrowings.created_at DESC
+       """)
+    else:
+        cursor.execute("""
+            SELECT borrowings.*, books.title, users.name
+            FROM borrowings
+            JOIN books ON borrowings.book_id = books.id
+            JOIN users ON borrowings.user_id = users.id
+            WHERE borrowings.status = %s
+            ORDER BY borrowings.created_at DESC
+        """, (status_filter,))
+
+    borrowings = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template('admin/borrowings.html', borrowings=borrowings, status_filter = status_filter)
 
 
 @app.route('/browse')
@@ -269,8 +299,13 @@ def faq():
     conn.close()
     return render_template('user/faq.html', sporsmal=sporsmal, LoggedIn=LoggedIn)
 
+
+#if __name__ == '__main__':
+#   app.run(debug=True)
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+ serve(app, host='0.0.0.0', port=8080)
 
     
 

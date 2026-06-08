@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Katalog</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
@@ -23,20 +24,24 @@
 <h1>Bokkatalog</h1>
 
 {% for bok in bøker %}
-<div>
-    <h3>{{ bok['title'] }}</h3>
-    <p>{{ bok['author'] }}</p>
-    <p>{{ bok['genre'] if bok['genre'] else 'Ingen sjanger' }}</p>
-
     {% if bok['id'] in opptatte %}
-        <p>Utilgjengelig</p>
+        <div class="bok-kort utilgjengelig">
+            <h3>{{ bok['title'] }}</h3>
+            <p>{{ bok['author'] }}</p>
+            <p>{{ bok['genre'] if bok['genre'] else 'Ingen sjanger' }}</p>
+            <p class="status-tekst">Utilgjengelig</p>
+        </div>
     {% else %}
-        <p>Tilgjengelig</p>
-        <form method="POST" action="{{ url_for('request_loan', book_id=bok['id']) }}">
-            <button type="submit">Send forespørsel</button>
-        </form>
+        <div class="bok-kort tilgjengelig">
+            <h3>{{ bok['title'] }}</h3>
+            <p>{{ bok['author'] }}</p>
+            <p>{{ bok['genre'] if bok['genre'] else 'Ingen sjanger' }}</p>
+            <p class="status-tekst">Tilgjengelig</p>
+            <form method="POST" action="{{ url_for('request_loan', book_id=bok['id']) }}">
+                <button type="submit">Send forespørsel</button>
+            </form>
+        </div>
     {% endif %}
-</div>
 {% endfor %}
 
 </body>
