@@ -21,10 +21,12 @@
 
 <h1>Låneforespørsler</h1>
 
-<a href="?status=all">Alle</a>
-<a href="?status=pending">Venter</a>
-<a href="?status=active">Aktive</a>
-<a href="?status=returned">Returnerte</a>
+<div class="admin-filter-boks">
+    <a href="?status=all" class="admin-filter">Alle</a>
+    <a href="?status=pending" class="admin-filter">Venter</a>
+    <a href="?status=active" class="admin-filter">Aktive</a>
+    <a href="?status=returned" class="admin-filter">Returnerte</a>
+</div>
 
 <table>
     <thead>
@@ -46,10 +48,22 @@
             <td>{{ b['created_at'] }}</td>
             <td>{{ b['due_date'] if b['due_date'] else '—' }}</td>
             <td>
+                {# Hvis lånet venter på godkjenning: Vis Godkjenn og Avvis #}
                 {% if b['status'] == 'pending' %}
-                    <form method="POST" action="{{ url_for('approve_borrowing', id=b['id']) }}" style="display:inline">
+                    <form method="POST" action="{{ url_for('approve_borrowing', id=b['id']) }}" class="tabell-form">
                         <input type="date" name="due_date" required>
                         <button type="submit">Godkjenn</button>
+                    </form>
+
+                    <form method="POST" action="{{ url_for('reject_borrowing', id=b['id']) }}" class="tabell-form">
+                        <button type="submit" class="slett-knapp">Avvis</button>
+                    </form>
+                {% endif %}
+
+                {# Hvis lånet er aktivt: Vis knappen for å markere som returnert #}
+                {% if b['status'] == 'active' %}
+                    <form method="POST" action="{{ url_for('return_borrowing', id=b['id']) }}" class="tabell-form">
+                        <button type="submit" style="background-color: #2ecc71;">Marker som returnert</button>
                     </form>
                 {% endif %}
             </td>

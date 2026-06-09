@@ -8,7 +8,7 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"
+app.secret_key = os.getenv('SECRET_KEY')
 bcrypt = Bcrypt(app)
 
 @app.route('/')
@@ -209,8 +209,9 @@ def approve_borrowing(id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
+    #Spørringen under er fra Claude
     try:
-        cursor.execute("""
+        cursor.execute("""  
             UPDATE borrowings
             SET status = 'active', borrowed_at = CURDATE(), due_date = %s
             WHERE id = %s
@@ -226,10 +227,51 @@ def approve_borrowing(id):
     conn.close()
     return redirect(url_for('admin_borrowings'))
 
-#Lage reject borrowing routen her
-#@app.route('/admin/borrowings/reject/<int:id>', methods=['POST'])
-#def reject_borrowing(id):
+
+@app.route('/admin/borrowings/reject/<int:id>', methods=['POST'])
+def reject_borrowing(id):
+    if session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            DELETE FROM borrowings 
+            WHERE id = %s AND status = 'pending'
+        """, (id,))
+        conn.commit()
+        flash("Låneforespørsel ble avvist og fjernet.")
+    except Exception as e:
+        conn.rollback()
+        flash("Noe gikk galt under avvisning.")
+        print(f"Feil: {e}")
+
+    cursor.close()
+    conn.close()
+    return redirect(url_for('admin_borrowings'))
+
+@app.route('/admin/borrowings/return/<int:id>', methods = ['POST'])
+def return_borrowing(id):
+    if session.get('role') != 'admin':
+        return redirect(url_for(login))
     
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE borrowings
+        SET status = 'returned', returned_at = CURDATE()
+        WHERE id = %s AND status = 'active'
+    """,(id,))
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('admin_borrowings'))
+
+
 
 @app.route('/faq', methods=['GET', 'POST'])
 def faq():

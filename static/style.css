@@ -13,15 +13,22 @@ body {
     padding-bottom: 60px;
 }
 
-h1, h2, h3 {
+/* RETTING: Sørger for at overskrifter og vanlig tekst (FAQ) ikke klistrer seg til venstrekanten */
+h1, h2, h3, body > p {
     color: #2c3e50;
     margin-bottom: 15px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 h1 {
     margin-top: 30px;
     border-bottom: 2px solid #e2e8f0;
     padding-bottom: 10px;
+    text-align: center; /* Gjør tittelen clean og sentrert */
 }
 
 hr {
@@ -31,8 +38,8 @@ hr {
     background: #e2e8f0;
 }
 
-/* Sentrering av generelt innhold */
-body > h1, body > table, body > p, body > h2, .katalog-container {
+/* --- Sentrering av innholdet på siden --- */
+body > table, .katalog-container {
     max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
@@ -84,7 +91,7 @@ form {
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     max-width: 500px;
-    margin: 30px auto;
+    margin: 40px auto; /* RETTING: Sentrerer logg inn-boksen midt på skjermen automatisk */
 }
 
 label {
@@ -135,11 +142,12 @@ button:hover {
     background-color: #2980b9;
 }
 
-/* Slett bruker-knapp (Rød) */
-h2 + p + form button {
+/* Rød sletteknapp */
+.slett-knapp {
     background-color: #e74c3c;
 }
-h2 + p + form button:hover {
+
+.slett-knapp:hover {
     background-color: #c0392b;
 }
 
@@ -150,7 +158,7 @@ h2 + p + form button:hover {
     margin-bottom: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    border-left: 6px solid #64748b; /* Standard grå */
+    border-left: 6px solid #64748b;
     width: 100%;
 }
 
@@ -182,22 +190,22 @@ h2 + p + form button:hover {
     background-color: #fcfcfc;
 }
 
-.bok-kort.utilgjengelig .status-tekst {
-    color: #c0392b;
-    font-weight: bold;
-}
-
 /* Knapp inni bokkortet */
-.bok-kort form {
+.bok-knapp-form {
     margin: 5px 0 0 0;
     padding: 0;
     box-shadow: none;
     max-width: 180px;
 }
 
-.bok-kort button {
+.bok-knapp-form button {
     padding: 8px 15px;
     font-size: 14px;
+}
+
+.bok-kort.utilgjengelig .status-tekst {
+    color: #c0392b;
+    font-weight: bold;
 }
 
 /* --- Admin Tabell --- */
@@ -229,11 +237,16 @@ tr:hover {
     background-color: #f8fafc;
 }
 
-/* Admin filter-lenker */
-a[href*="status"] {
+/* RETTING: Sentrerer filter-lenkene pent under "Låneforespørsler" */
+.admin-filter-boks {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.admin-filter {
     display: inline-block;
     padding: 8px 16px;
-    margin-right: 10px;
+    margin: 0 5px;
     background-color: #e2e8f0;
     color: #4a5568;
     text-decoration: none;
@@ -242,11 +255,12 @@ a[href*="status"] {
     font-weight: 500;
 }
 
-a[href*="status"]:hover {
+.admin-filter:hover {
     background-color: #cbd5e1;
 }
 
-table form {
+/* Skjemaet inni tabellen (Godkjenn-knappen) */
+.tabell-form {
     margin: 0 !important;
     padding: 0;
     box-shadow: none;
@@ -256,23 +270,57 @@ table form {
     max-width: 100%;
 }
 
-table input[type="date"] {
+.tabell-form input[type="date"] {
     margin-bottom: 0;
     padding: 5px;
     font-size: 14px;
 }
 
-table button {
+.tabell-form button {
     padding: 5px 10px;
     font-size: 14px;
     width: auto;
 }
 
-/* --- FAQ Stil --- */
-body > p:has(strong) {
+/* --- FAQ-spørsmålsliste --- */
+.faq-innlegg {
     background: white;
     padding: 15px;
     border-radius: 6px;
     margin-bottom: 10px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
+
+/* --- Fiks for admin-tabell handlinger --- */
+
+/* Sørger for at skjemaene inni cellen oppfører seg som inline-elementer */
+.tabell-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    background: transparent;
+    max-width: none; /* Fjerner max-width på 500px */
+}
+
+/* Gjør at datovelgeren får en fast, ryddig bredde */
+.tabell-form input[type="date"] {
+    width: 140px;
+    padding: 6px 10px;
+    margin-bottom: 0;
+    font-size: 14px;
+    height: 36px;
+}
+
+/* Overstyrer global "width: 100%" så knappene kun tar plassen de trenger */
+.tabell-form button {
+    width: auto;
+    padding: 6px 15px;
+    font-size: 14px;
+    height: 36px;
+    margin: 0;
+    white-space: nowrap;
+}
+

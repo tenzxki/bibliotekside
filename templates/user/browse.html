@@ -10,39 +10,41 @@
 <nav>
     <a href="{{ url_for('browse') }}">Katalog</a>
     <a href="{{ url_for('my_loans') }}">Mine lån</a>
-    <a href="{{url_for('faq')}}">FAQ</a>
+    <a href="{{ url_for('faq') }}">FAQ</a>
     <div>Hei, {{ session['name'] }}</div>
     <a href="{{ url_for('logout') }}">Logg ut</a>
 </nav>
 
 {% with messages = get_flashed_messages() %}
     {% for message in messages %}
-        <div>{{ message }}</div>
+        <div class="message">{{ message }}</div>
     {% endfor %}
 {% endwith %}
 
 <h1>Bokkatalog</h1>
 
+<div class="katalog-container">
 {% for bok in bøker %}
     {% if bok['id'] in opptatte %}
         <div class="bok-kort utilgjengelig">
             <h3>{{ bok['title'] }}</h3>
-            <p>{{ bok['author'] }}</p>
-            <p>{{ bok['genre'] if bok['genre'] else 'Ingen sjanger' }}</p>
+            <p class="forfatter">{{ bok['author'] }}</p>
+            <p class="sjanger">{{ bok['genre'] if bok['genre'] else 'Ingen sjanger' }}</p>
             <p class="status-tekst">Utilgjengelig</p>
         </div>
     {% else %}
         <div class="bok-kort tilgjengelig">
             <h3>{{ bok['title'] }}</h3>
-            <p>{{ bok['author'] }}</p>
-            <p>{{ bok['genre'] if bok['genre'] else 'Ingen sjanger' }}</p>
+            <p class="forfatter">{{ bok['author'] }}</p>
+            <p class="sjanger">{{ bok['genre'] if bok['genre'] else 'Ingen sjanger' }}</p>
             <p class="status-tekst">Tilgjengelig</p>
-            <form method="POST" action="{{ url_for('request_loan', book_id=bok['id']) }}">
+            <form method="POST" action="{{ url_for('request_loan', book_id=bok['id']) }}" class="bok-knapp-form">
                 <button type="submit">Send forespørsel</button>
             </form>
         </div>
     {% endif %}
 {% endfor %}
+</div>
 
 </body>
 </html>
