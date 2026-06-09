@@ -7,17 +7,14 @@
 ## 1. Prosjektidé og problemstilling
 
 ### Beskrivelse
-Jeg skal lage en nettbasert bibliotekside hvor man logger inn og kan låne bøker fra en katalog. Brukeren sender en forespørsel om å låne en bok, og en administrator må godkjenne eller avslå forespørselen. Brukeren kan selv returnere en bok de har lånt, og admin kan også markere bøker som returnert. Når man logger inn blir man automatisk sendt til enten brukersiden eller adminsiden basert på hvilken rolle kontoen har. 
+Målet med prosjektet er å videreutvikle den eksisterende biblioteksiden og implementere den funksjonaliteten som trengs for at systemet skal fungere som en sikker og pålitelig løsning for bokutlån.
 
 ## Hva skal jeg gjøre på Eksamensdagen
 
 På eksamensdagen skal jeg
-- Lage et fungerende biblioteksystem som beskrevet ovenfor.
-- Implementere sikkerhet med sessions, bcrypt og .env-fil
-- Vise kunnskap om SSH og Debian WSL for sensor
-- Bruke Kanban til prosjektstyring
-- Opprette tabeller, koble til databasen og legge til alle ruter
-- Login som redirecter bruker til riktig side basert på rolle.
+- Implementere fullstendig funksjonalitet for utlån. (At admin kan avslå forespørsel og returnere en bok som returnert. Samme med at brukeren kan returnere en bok de har lånt. Har jeg god tid vil jeg legge til at admin kan manuelt sette inn, redigere og slette brukere/bøker fra systemet på nettsiden. )
+- Deploye applikasjonen på en Raspberry Pi og demonstrere fjernstyring via SSH (Vise statisk ip-adresse også), åpning og lukking av porter og push/pull fra pcen til raspberry pi. 
+- Forklare systemets dataflyt, sikkerhetsmekanismer og relevante lovverk (GDPR).
 
 - https://github.com/users/tenzxki/projects/2
 
@@ -43,7 +40,7 @@ På eksamensdagen skal jeg
 
 ### Servermiljø
 
-*Applikasjonen kjøres lokalt på Windows via Debian WSL. MariaDB er installert og kjører inne i Debian. Flask applikasjonen serveres med Waitress på port 8080.*
+*Applikasjonen kjøres og hostes eksternt på en Raspberry Pi som kjører Linux (Debian-basert OS). MariaDB-databasen og Flask-applikasjonen er installert direkte på Pi-en, og nettsiden serveres på lokalnettverket med produksjonsserveren Waitress på port 8080. All administrasjon, koding og oppsett av serveren gjøres fra min egen PC via SSH (Secure Shell) i terminalen.*
 
 ### Nettverksoppsett
 
@@ -80,6 +77,9 @@ På eksamensdagen skal jeg
 - Admin : godkjenn forespørsel
 - Admin : avslå forespørsel
 - Admin : marker som returnert
+- Admin : sette inn brukere og bøker        
+- Admin : redigere brukere og bøker 
+- Admin : slette brukere og bøker
 - Bruker: Katalog
 - Bruker : Send låneforespørsel
 - Bruker : mine lån
@@ -121,6 +121,13 @@ Kanban-boardet ga god oversikt over hva som var gjort og hva som gjenstod.
 |  3 |       3 |       2 | returned| 2026-03-01  | 2026-04-01 | 2026-03-28  |
 +----+---------+---------+---------+-------------+------------+-------------+
 
++----+---------------------------------+---------------------+---------+
+| id | sporsmal                        | opprettet           | user_id |
++----+---------------------------------+---------------------+---------+
+|  1 | Hvordan logger jeg inn?         | 2026-06-08 22:15:00 |       2 |
+|  2 | Kan jeg låne to bøker samtidig? | 2026-06-08 22:30:00 |       3 |
++----+---------------------------------+---------------------+---------+
+
 
 **SQL-eksempel:**
 
@@ -155,10 +162,19 @@ CREATE TABLE borrowings (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+CREATE TABLE faq (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sporsmal TEXT NOT NULL,
+    opprettet DATETIME DEFAULT CURRENT_TIMESTAMP(),
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 ```
 **Relasjoner**
+Relasjoner:
 users --< borrowings >-- books
-En bruker kan ha mange borrowings. En bok kan ha mange borrowings over tid, men bare en aktiv om gangen.
+users --< faq
 
 ------------------------------------------------------------------------
 
@@ -207,6 +223,7 @@ Databasestrøm:
 | POST | `/browse/request/<book_id>` | Send låneforespørsel |
 | GET | `/my-loans` | Se egne lån og historikk |
 | POST | `/my-loans/return/<id>` | Returner bok selv |
+| GET/POST | `/faq`           | Se ofte stilte spørsmål og send inn nye  |
 
 Login-ruten sjekker at brukeren finnes i databasen og at bcrypt.check_password_hash stemmer. Ved godkjent innlogging lagres user_id, name og role i session, og brukeren redirectes til riktig side.
 
@@ -241,6 +258,10 @@ AND status = 'active'" Sørger for at systemet ikke tillater at to personer har 
   
 -   Feilhåndtering: En del av koden som skriver data er pakket i try/except. Ved feil kalles conn.rollback() for å angre transaksjonen og brukeren får melding om at noe gikk galt.
 
+### GDPR loven
+* **Dataminimering (Art. 5):** Vi samler kun inn informasjon som er strengt nødvendig for at biblioteksystemet skal fungere (navn, e-post for innlogging, samt lånehistorikk). Overflødige data som adresse eller telefonnummer samles ikke inn.
+* **Informasjonssikkerhet (Art. 32):** Sikkerhetstiltakene over (Bcrypt og `.env`) oppfyller lovens krav om å sikre personopplysninger mot uautorisert tilgang.
+* **Retten til sletting og anonymisering (Art. 17):** Systemet har en innebygd funksjon under FAQ-siden for anonymisering av brukere. Når en bruker sletter/anonymiserer kontoen sin, kjøres en `UPDATE`-spørring som endrer navnet til "Slettet bruker" og genererer en anonym e-postadresse. Dette gjør at statistikk over utlån bevares for biblioteket, samtidig som personopplysningene slettes permanent i tråd med "retten til å bli glemt".
 ------------------------------------------------------------------------
 
 ## 9. Feilsøking og testing
