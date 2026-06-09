@@ -324,3 +324,106 @@ tr:hover {
     white-space: nowrap;
 }
 
+/* --- UTFLYTTET CSS FRA BROWSE-SIDEN --- */
+
+/* Boksen øverst */
+.admin-opprett-boks {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin: 0 auto 30px auto;
+    max-width: 500px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.admin-opprett-boks h3 {
+    margin-top: 0;
+    color: #333;
+}
+.admin-label-opprett {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+.admin-input-opprett {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.admin-input-opprett-genre {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 18px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.btn-lagre-admin {
+    background: #3498db;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+}
+
+/* Kortene for admin */
+.admin-kort-topp {
+    border-top: 5px solid #2ecc71;
+}
+.admin-label-kort {
+    font-size: 11px;
+    color: #777;
+    display: block;
+}
+.admin-input-kort {
+    width: 100%;
+    padding: 4px;
+    margin-bottom: 5px;
+    box-sizing: border-box;
+}
+.admin-input-kort-siste {
+    width: 100%;
+    padding: 4px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+.admin-knapp-gruppe {
+    display: flex;
+    gap: 5px;
+}
+.btn-oppdater-admin {
+    background: #2ecc71;
+    color: white;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    flex: 1;
+    font-weight: bold;
+}
+.btn-slett-admin {
+    background: #e74c3c;
+    color: white;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Nullstilling av skjemaer */
+.admin-skjema-clean {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+}
+.admin-skjema-inline {
+    display: inline;
+}

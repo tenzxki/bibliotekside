@@ -23,26 +23,75 @@
 
 <h1>Bokkatalog</h1>
 
+{% if session['role'] == 'admin' %}
+<div class="admin-opprett-boks">
+    <h3>Admin: Legg til ny bok manuelt</h3>
+    <form method="POST" action="{{ url_for('browse') }}">
+        <input type="hidden" name="action" value="create_book">
+        
+        <label class="admin-label-opprett">Boktittel:</label>
+        <input type="text" name="title" required class="admin-input-opprett">
+        
+        <label class="admin-label-opprett">Forfatter:</label>
+        <input type="text" name="author" required class="admin-input-opprett">
+        
+        <label class="admin-label-opprett">Sjanger:</label>
+        <input type="text" name="genre" placeholder="f.eks. Fantasy, Roman" class="admin-input-opprett-genre">
+        
+        <button type="submit" class="btn-lagre-admin">Lagre ny bok i databasen</button>
+    </form>
+</div>
+{% endif %}
+
 <div class="katalog-container">
 {% for bok in bøker %}
-    {% if bok['id'] in opptatte %}
-        <div class="bok-kort utilgjengelig">
-            <h3>{{ bok['title'] }}</h3>
-            <p class="forfatter">{{ bok['author'] }}</p>
-            <p class="sjanger">{{ bok['genre'] if bok['genre'] else 'Ingen sjanger' }}</p>
-            <p class="status-tekst">Utilgjengelig</p>
-        </div>
-    {% else %}
-        <div class="bok-kort tilgjengelig">
-            <h3>{{ bok['title'] }}</h3>
-            <p class="forfatter">{{ bok['author'] }}</p>
-            <p class="sjanger">{{ bok['genre'] if bok['genre'] else 'Ingen sjanger' }}</p>
-            <p class="status-tekst">Tilgjengelig</p>
-            <form method="POST" action="{{ url_for('request_loan', book_id=bok['id']) }}" class="bok-knapp-form">
-                <button type="submit">Send forespørsel</button>
+    
+    {% if session['role'] == 'admin' %}
+        <div class="bok-kort tilgjengelig admin-kort-topp">
+            <form method="POST" action="{{ url_for('browse') }}" class="admin-skjema-clean">
+                <input type="hidden" name="action" value="update_book">
+                <input type="hidden" name="book_id" value="{{ bok['id'] }}">
+                
+                <label class="admin-label-kort">Tittel:</label>
+                <input type="text" name="title" value="{{ bok['title'] }}" required class="admin-input-kort">
+                
+                <label class="admin-label-kort">Forfatter:</label>
+                <input type="text" name="author" value="{{ bok['author'] }}" required class="admin-input-kort">
+                
+                <label class="admin-label-kort">Sjanger:</label>
+                <input type="text" name="genre" value="{{ bok['genre'] if bok['genre'] else '' }}" class="admin-input-kort-siste">
+                
+                <div class="admin-knapp-gruppe">
+                    <button type="submit" class="btn-oppdater-admin">Oppdater</button>
             </form>
+            
+            <form method="POST" action="{{ url_for('delete_book', book_id=bok['id']) }}" onsubmit="return confirm('Vil du slette boken permanent?');" class="admin-skjema-clean admin-skjema-inline">
+                <button type="submit" class="btn-slett-admin">Slett</button>
+            </form>
+                </div>
         </div>
+
+    {% else %}
+        {% if bok['id'] in opptatte %}
+            <div class="bok-kort utilgjengelig">
+                <h3>{{ bok['title'] }}</h3>
+                <p class="forfatter">{{ bok['author'] }}</p>
+                <p class="sjanger">{{ bok['genre'] if bok['genre'] else 'Ingen sjanger' }}</p>
+                <p class="status-tekst">Utilgjengelig</p>
+            </div>
+        {% else %}
+            <div class="bok-kort tilgjengelig">
+                <h3>{{ bok['title'] }}</h3>
+                <p class="forfatter">{{ bok['author'] }}</p>
+                <p class="sjanger">{{ bok['genre'] if bok['genre'] else 'Ingen sjanger' }}</p>
+                <p class="status-tekst">Tilgjengelig</p>
+                <form method="POST" action="{{ url_for('request_loan', book_id=bok['id']) }}" class="bok-knapp-form">
+                    <button type="submit">Send forespørsel</button>
+                </form>
+            </div>
+        {% endif %}
     {% endif %}
+
 {% endfor %}
 </div>
 

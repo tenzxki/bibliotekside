@@ -119,13 +119,51 @@ def admin_borrowings():
     return render_template('admin/borrowings.html', borrowings=borrowings, status_filter = status_filter)
 
 
-@app.route('/browse')
+@app.route('/browse', methods=['GET', 'POST'])
 def browse():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+
+    #Fikk litt hjelp av gemini til å starte.
+
+    if request.method == 'POST' and session.get('role') == 'admin':
+        action = request.form.get('action')
+    
+        if action == 'create_book':
+            title = request.form['title']
+            author = request.form['author']
+            genre = request.form['genre']
+            try:
+                cursor.execute("INSERT INTO books (title, author, genre) VALUES (%s, %s, %s)", (title, author, genre))
+                conn.commit()
+                flash("Boken ble lagt til i biblioteket!")
+            except Exception as e:
+                conn.rollback()
+                flash("Kunne ikke legge til boken.")
+                print(f"Feil: {e}")
+    
+        elif action == 'update_book':
+            book_id = request.form['book_id']
+            title = request.form['title']
+            author = request.form['author']
+            genre = request.form['genre']
+            try:
+                cursor.execute("""
+                    UPDATE books 
+                    SET title = %s, author = %s, genre = %s 
+                    WHERE id = %s
+                """, (title, author, genre, book_id))
+                conn.commit()
+                flash("Boken ble oppdatert!")
+            except Exception as e:
+                conn.rollback()
+                flash("Kunne ikke oppdatere boken.")
+                print(f"Feil: {e}")
+
+        return redirect(url_for('browse'))
 
     cursor.execute("SELECT * FROM books ORDER BY title")
     bøker = cursor.fetchall()
@@ -270,6 +308,27 @@ def return_borrowing(id):
     cursor.close()
     conn.close()
     return redirect(url_for('admin_borrowings'))
+
+
+@app.route('/admin/books/delete/<int:book_id>', methods=['POST'])
+def delete_book(book_id):
+    if session.get('role') != 'admin':
+        return redirect(url_for('login'))
+        
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("DELETE FROM books WHERE id = %s", (book_id,))
+        conn.commit()
+        flash("Boken ble slettet manuelt fra systemet!")
+    except Exception as e:
+        conn.rollback()
+        flash("Kan ikke slette boken! Den er knyttet til et eksisterende eller historisk utlån.")
+        print(f"Feil ved sletting: {e}")
+        
+    cursor.close()
+    conn.close()
+    return redirect(url_for('browse'))
 
 
 
